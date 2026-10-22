@@ -86,9 +86,10 @@ def testbed_factory(request):
 @pytest.fixture
 def ue_emulator(request):
     """Verdict playing the UE towards NR-Lite's gNB and AMF."""
-    emu = UeEmulator(log_level=request.config.getoption("--verdict-log-level"))
+    emu = UeEmulator(log_level=request.config.getoption("--verdict-log-level"), pcap_path=_pcap_path(request))
     request.node._verdict_sim = emu.sim
-    return emu
+    yield emu
+    emu.sim.stop_pcap()
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -99,6 +100,8 @@ def pytest_runtest_makereport(item, call):
         return
     if rep.when == "teardown" and rep.passed:
         return
+    if item.get_closest_marker("tc") is None:
+        return  # only conformance test cases get a verdict; harness unit tests are plain pytest
     tc_id, title, spec = _meta(item)
     sim = getattr(item, "_verdict_sim", None)
     duration = sim.now() if sim is not None else 0

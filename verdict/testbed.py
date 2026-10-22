@@ -130,8 +130,10 @@ class UeEmulator:
     """Verdict playing the UE: talks to NR-Lite's gNB and AMF through the air interface."""
 
     def __init__(self, seed: int = 1, rnti: int = 0x7001, amf: dict | None = None, gnb: dict | None = None,
-                 log_level: str = "info"):
+                 log_level: str = "info", pcap_path: str | None = None):
         self.sim = _nrlite.Simulator(seed=seed, log_level=log_level, gnb=gnb or {}, amf=amf or {})
+        if pcap_path:
+            self.sim.start_pcap(pcap_path)
         self.sim.amf_add_subscriber(TEST_SUPI, TEST_K, TEST_OPC, 0)
         self.sim.set_downlink_handler(self._on_dl)
         self.rnti = rnti

@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  conformance:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build and install (NR-Lite + pybind11 module)
+        run: python -m pip install .
+      - name: Run the conformance suite and harness unit tests
+        # The `pytest` entry point (not `python -m pytest`) keeps the source tree off sys.path, so the
+        # tests exercise the installed package and its compiled module.
+        run: pytest tests --verdict-report verdict-report.html --verdict-json verdict.json --verdict-pcap-dir traces
+      - name: Upload report and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verdict-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            verdict-report.html
+            verdict.json
+            traces/

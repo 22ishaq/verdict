@@ -1,0 +1,24 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "verdict"
+version = "0.1.0"
+description = "Protocol conformance test harness for the NR-Lite 5G NR stack"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["pytest>=8", "cryptography>=42"]
+
+[project.scripts]
+verdict = "verdict.cli:main"
+
+[tool.scikit-build]
+wheel.packages = ["verdict"]
+cmake.build-type = "Release"
+cmake.version = ">=3.20"
+sdist.include = ["third_party/nr-lite"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

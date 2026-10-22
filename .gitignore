@@ -2,4 +2,10 @@ build/
 .venv/
 __pycache__/
 *.so
+*.pyd
 *.pcap
+traces/
+verdict-report.html
+verdict.json
+*.egg-info/
+dist/
